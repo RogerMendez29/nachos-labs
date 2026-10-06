@@ -24,15 +24,18 @@ int testnum = 1;
 //	purposes.
 //----------------------------------------------------------------------
 
-void
-SimpleThread(int which)
-{
-    int num;
-    
-    for (num = 0; num < 5; num++) {
-	printf("*** thread %d looped %d times\n", which, num);
+int SharedVariable;
+void SimpleThread(int which) {
+    int num, val;
+    for(num = 0; num < 5; num++) {
+        val = SharedVariable;
+        printf("*** thread %d sees value %d\n", which, val);
+        currentThread ->Yield();
+        SharedVariable = val+1;
         currentThread->Yield();
     }
+    val = SharedVariable;
+    printf("Thread %d sees final value %d\n", which, val);
 }
 
 //----------------------------------------------------------------------
@@ -41,14 +44,13 @@ SimpleThread(int which)
 //	to call SimpleThread, and then calling SimpleThread ourselves.
 //----------------------------------------------------------------------
 
-void
-ThreadTest1()
-{
+void ThreadTest1(int n) {
     DEBUG('t', "Entering ThreadTest1");
 
-    Thread *t = new Thread("forked thread");
-
-    t->Fork(SimpleThread, 1);
+    for(int i =1; i<=n; i++){
+        Thread *t = new Thread("forked a thread");
+        t->Fork(SimpleThread, i);
+    }
     SimpleThread(0);
 }
 
@@ -61,14 +63,13 @@ ThreadTest1()
 
 int numThreadsActive; // used to implement barrier upon completion
 
-void
-ThreadTest(int n) {
+void ThreadTest(int n) {
     DEBUG('t', "Entering SimpleTest");
     Thread *t;
     numThreadsActive = n;
     printf("NumthreadsActive = %d\n", numThreadsActive);
 
-    for(int i=1; i<n; i++)
+    for(int i=0; i<n; i++)
     {
         t = new Thread("forked thread");
         t->Fork(SimpleThread,i);
@@ -78,12 +79,10 @@ ThreadTest(int n) {
 
 #else 
 
-void
-ThreadTest()
-{
+void ThreadTest(int n) {
     switch (testnum) {
     case 1:
-	ThreadTest1();
+	ThreadTest1(n);
 	break;
     default:
 	printf("No test specified.\n");
