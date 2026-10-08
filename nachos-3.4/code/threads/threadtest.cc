@@ -12,6 +12,10 @@
 #include "copyright.h"
 #include "system.h"
 
+#ifdef HW1_SEMAPHORES
+    #include "synch.h"
+#endif
+
 // testnum is set in main.cc
 int testnum = 1;
 
@@ -25,15 +29,49 @@ int testnum = 1;
 //----------------------------------------------------------------------
 
 int SharedVariable;
+
+#ifdef HW1_SEMAPHORES
+    Semaphore *key;
+    Semaphore *gate;
+
+    int numThreadsActive; // used to implement barrier upon completion
+    int threads;   
+#endif
+
 void SimpleThread(int which) {
     int num, val;
     for(num = 0; num < 5; num++) {
+
+        #ifdef HW1_SEMAPHORES
+            key->P(); // Here we are taking the key 
+        #endif
+
         val = SharedVariable;
         printf("*** thread %d sees value %d\n", which, val);
         currentThread ->Yield();
         SharedVariable = val+1;
+
+        #ifdef HW1_SEMAPHORES
+            key->V();  // Here we are returning the key
+        #endif
+        
         currentThread->Yield();
+        
     }
+    #ifdef HW1_SEMAPHORES
+        key->P();
+        numThreadsActive--; 
+        if(numThreadsActive==0){
+            for(int i =0; i<threads+1; i++){
+                gate->V(); // opening the gate for every thread to be able to see the SharedVariable.
+            }
+
+        } 
+        key->V();
+        gate->P(); // closing the gate
+    #endif
+
+    
     val = SharedVariable;
     printf("Thread %d sees final value %d\n", which, val);
 }
@@ -46,8 +84,7 @@ void SimpleThread(int which) {
 
 void ThreadTest1(int n) {
     DEBUG('t', "Entering ThreadTest1");
-
-    for(int i =1; i<=n; i++){
+    for(int i=1; i<=n; i++){
         Thread *t = new Thread("forked a thread");
         t->Fork(SimpleThread, i);
     }
@@ -60,16 +97,18 @@ void ThreadTest1(int n) {
 //----------------------------------------------------------------------
 
 #ifdef HW1_SEMAPHORES
-
-int numThreadsActive; // used to implement barrier upon completion
-
 void ThreadTest(int n) {
     DEBUG('t', "Entering SimpleTest");
+
+    key = new Semaphore("Master Key",1);
+    gate = new Semaphore("gate", 0);
+
     Thread *t;
-    numThreadsActive = n;
+    numThreadsActive = n+1;
+    threads =n+1;
     printf("NumthreadsActive = %d\n", numThreadsActive);
 
-    for(int i=0; i<n; i++)
+    for(int i=1; i<=n; i++)
     {
         t = new Thread("forked thread");
         t->Fork(SimpleThread,i);
