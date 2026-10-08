@@ -1,6 +1,19 @@
 COP4610 — Nachos Project 1 Report
 Group Members: Roger Mendez
 
-Exercise 1: After modifying the SimpleThread function and running it with different numbers of threads, we can see that the different threads are working from the same value of SharedVariable. Each thread reads
-SharedVariable into its own local variable  and then runs the yield function. When it resumes, it writes val + 1 using that old value, so it isn't using the
-update the other threads made while it was yielded. 
+Exercise 1:
+
+    After modifying the SimpleThread function and running it with different numbers of threads, we can see that the different threads are working from the same value of SharedVariable. Each thread reads
+    SharedVariable into its own local variable  and then runs the yield function. When it resumes, it writes val + 1 using that old value, so it isn't using the
+    update the other threads made while it was yielded. 
+
+    After adding semaphores to synchronize access to SharedVariable, we can see that only one thread at a time can enter the critical section. We did this by adding a semaphore called key. We instantiated it with a value of 1, so
+    the first thread to arrive can enter the critical section and then return the key by calling V() when it is done. This makes the critical section
+    mutually exclusive. We also added a second semaphore named gate with an initial value of 0. This prevents early access to the final value of SharedVariable: every thread must wait for the last thread to finish its loop before any of them can read the
+    final value.
+
+Exercise 2: 
+
+    We implemented the Lock by writing its writing the Acquire() & Release() methods. We noticed that we needed a way to tell whether a thread is the actual owner of the lock it's trying to release, so we added an owner attribute to the Lock class, of type Thread*.
+    Acquire() and Release() work like P() and V() in the Semaphore class. Acquire() checks whether the lock has an owner. If it doesn't, the current thread becomes the owner. If it does, the current thread adds itself to the waiting queue and goes to sleep.
+    Release() checks that the lock is held by the current thread. If it is, it sets the lock's owner to NULL, removes the next thread from the queue, and marks it as ready to run.
