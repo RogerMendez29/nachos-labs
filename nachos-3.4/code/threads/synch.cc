@@ -102,8 +102,8 @@ Semaphore::V()
 // the test case in the network assignment won't work!
 Lock::Lock(const char* debugName) {
     name = debugName;
-    free = true;
     queue = new List;
+    owner = NULL;
 }
 Lock::~Lock() {
     delete queue;
@@ -112,37 +112,40 @@ Lock::~Lock() {
 void Lock::Acquire() {
 
     // Disable interrupts -- similar to Semaphore P()
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
 
     // Check if lock is free
-
     // If yes, make the lock not free anymore
-    free = false;
+    
+        while(owner != NULL){
+            queue-> Append((void *)currentThread);
+            currentThread->Sleep();
+        }  
+    owner = currentThread;
 
-    // Else, lock is not free -- add self to queue
-    // (keep checking for free lock while)
-
-    // Enable interrupts
+    (void) interrupt->SetLevel(oldLevel); // Enable interrupts
 }
 void Lock::Release() {
-
-    // disable interrupts
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
 
     // check if thread has lock ... isHeldByCurrentThread ?
+    
+    DEBUG('t', "The following Thread %s is releasing lock %s\n they should be equal", currentThread->getName(), name);
+    ASSERT(isHeldByCurrentThread());
 
-    // If not, do nothing
-
-    free = true;
-
-    // If yes, release the lock and wakeup 1 of the waiting threads in queue
-
-    // enable interrupts
+    
+    owner = NULL;
+    Thread *nextThread = (Thread *)queue->Remove();
+    if(nextThread != NULL){
+    scheduler-> ReadyToRun(nextThread); // waking up the next thread in line
+    }
+    
+     (void) interrupt->SetLevel(oldLevel); // Enable interrupts
 
 }
 
 bool Lock::isHeldByCurrentThread() {
-
-    return true;
-
+    return owner == currentThread;
 }
 
 Condition::Condition(const char* debugName) {

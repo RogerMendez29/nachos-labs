@@ -1,0 +1,6 @@
+COP4610 — Nachos Project 1 Report
+Group Members: Roger Mendez
+
+Exercise 1: After modifying the SimpleThread function and running it with different numbers of threads, we can see that the different threads are working from the same value of SharedVariable. Each thread reads
+SharedVariable into its own local variable  and then runs the yield function. When it resumes, it writes val + 1 using that old value, so it isn't using the
+update the other threads made while it was yielded. 

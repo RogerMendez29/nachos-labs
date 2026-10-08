@@ -105,14 +105,14 @@ main(int argc, char **argv) {
 #if defined(CHANGED) && defined(HW1_CONDITION)
 	Ping();
 #else
-    ThreadTest(2);
+    ThreadTest(1);
 #endif
 
 
 #if defined(CHANGED) && defined(HW1_ELEVATOR)
 	// ElevatorTest(5, 5);
 #else
-    ThreadTest();
+    // ThreadTest(1);
 #endif
 
 
