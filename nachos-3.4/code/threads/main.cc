@@ -112,7 +112,7 @@ main(int argc, char **argv) {
 #if defined(CHANGED) && defined(HW1_ELEVATOR)
 	// ElevatorTest(5, 5);
 #else
-    ThreadTest(1);
+    // ThreadTest(1);
 #endif
 
 

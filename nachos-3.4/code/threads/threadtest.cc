@@ -12,7 +12,7 @@
 #include "copyright.h"
 #include "system.h"
 
-#ifdef HW1_SEMAPHORES
+#if defined(HW1_SEMAPHORES)  || defined(HW1_LOCKS)
     #include "synch.h"
 #endif
 
@@ -30,20 +30,28 @@ int testnum = 1;
 
 int SharedVariable;
 
-#ifdef HW1_SEMAPHORES
-    Semaphore *key;
+#if defined(HW1_SEMAPHORES) || defined(HW1_LOCKS)
     Semaphore *gate;
-
     int numThreadsActive; // used to implement barrier upon completion
     int threads;   
+#endif
+
+#ifdef HW1_SEMAPHORES
+    Semaphore *key; 
+#endif
+
+#ifdef HW1_LOCKS
+    Lock *lock;
 #endif
 
 void SimpleThread(int which) {
     int num, val;
     for(num = 0; num < 5; num++) {
 
-        #ifdef HW1_SEMAPHORES
-            key->P(); // Here we are taking the key 
+        #if defined(HW1_LOCKS)
+            lock -> Acquire(); 
+        #elif defined(HW1_SEMAPHORES)
+            key->P(); // Here we are taking the key
         #endif
 
         val = SharedVariable;
@@ -51,23 +59,35 @@ void SimpleThread(int which) {
         currentThread ->Yield();
         SharedVariable = val+1;
 
-        #ifdef HW1_SEMAPHORES
+        #if defined(HW1_LOCKS)
+            lock -> Release();
+        #elif defined(HW1_SEMAPHORES)
             key->V();  // Here we are returning the key
         #endif
         
         currentThread->Yield();
         
     }
-    #ifdef HW1_SEMAPHORES
-        key->P();
+
+    #if defined(HW1_SEMAPHORES) || defined(HW1_LOCKS)
+        #if defined(HW1_LOCKS)
+            lock->Acquire();
+        #elif defined(HW1_SEMAPHORES)
+            key->P();
+        #endif
+
         numThreadsActive--; 
-        if(numThreadsActive==0){
-            for(int i =0; i<threads+1; i++){
+        if(numThreadsActive == 0){
+            for(int i =0; i <threads; i++){
                 gate->V(); // opening the gate for every thread to be able to see the SharedVariable.
             }
 
         } 
-        key->V();
+        #if defined(HW1_LOCKS)
+            lock->Release();
+        #elif defined(HW1_SEMAPHORES)
+            key->V();
+        #endif
         gate->P(); // closing the gate
     #endif
 
@@ -84,6 +104,7 @@ void SimpleThread(int which) {
 
 void ThreadTest1(int n) {
     DEBUG('t', "Entering ThreadTest1");
+
     for(int i=1; i<=n; i++){
         Thread *t = new Thread("forked a thread");
         t->Fork(SimpleThread, i);
@@ -96,11 +117,16 @@ void ThreadTest1(int n) {
 // 	Invoke a test routine.
 //----------------------------------------------------------------------
 
-#ifdef HW1_SEMAPHORES
+#if defined(HW1_SEMAPHORES)  || defined(HW1_LOCKS)
 void ThreadTest(int n) {
     DEBUG('t', "Entering SimpleTest");
 
-    key = new Semaphore("Master Key",1);
+    #if defined(HW1_LOCKS)
+        lock= new Lock("Master Lock");
+    #elif defined(HW1_SEMAPHORES)
+        key = new Semaphore("Master Key",1);    
+    #endif
+
     gate = new Semaphore("gate", 0);
 
     Thread *t;
