@@ -157,34 +157,53 @@ Condition::~Condition() {
 }
 
 void Condition::Wait(Lock* conditionLock) {
-
-    // check if calling thread holds the lock
+    ASSERT(conditionLock != NULL);
     ASSERT(conditionLock->isHeldByCurrentThread());
 
-    // Release the lock
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
 
-    // put self in the queue of waiting threads
+    // Release the lock and join the waiting queue.
+    conditionLock->Release();
+    queue->Append((void*) currentThread);
 
-    // Re-acquire the lock
+    // Sleep until another thread signals us.
+    currentThread->Sleep();
 
+    // Restore interrupt state and reacquire the lock.
+    (void) interrupt->SetLevel(oldLevel);
+    conditionLock->Acquire();
 }
+
 void Condition::Signal(Lock* conditionLock) {
-
-    // check if calling thread holds the lock
+    ASSERT(conditionLock != NULL);
     ASSERT(conditionLock->isHeldByCurrentThread());
 
-    // Dequeue one of the threads in the queue
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
 
-    // If thread exists, wake it up.
+    // Wake one waiting thread, if there is one.
+    Thread* thread = (Thread*) queue->Remove();
 
+    if (thread != NULL) {
+        scheduler->ReadyToRun(thread);
+    }
+
+    (void) interrupt->SetLevel(oldLevel);
 }
-void Condition::Broadcast(Lock* conditionLock) {
 
-    // check if calling thread holds the lock
+void Condition::Broadcast(Lock* conditionLock) {
+    ASSERT(conditionLock != NULL);
     ASSERT(conditionLock->isHeldByCurrentThread());
 
-    // Dequeue all threads in the queue one-by-one
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
 
-    // Wakeup each thread
+    // Wake all waiting threads.
+    while (!queue->IsEmpty()) {
+        Thread* thread = (Thread*) queue->Remove();
 
- }
+        if (thread != NULL) {
+            scheduler->ReadyToRun(thread);
+        }
+    }
+
+    (void) interrupt->SetLevel(oldLevel);
+}
