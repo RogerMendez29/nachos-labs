@@ -102,20 +102,16 @@ main(int argc, char **argv) {
       }
     }
 
+#endif
+
+#if defined(CHANGED) && defined(HW1_ELEVATOR)
+    ElevatorTest(5, 25);
+#elif defined(THREADS)
 #if defined(CHANGED) && defined(HW1_CONDITION)
 	Ping();
 #else
     ThreadTest(1);
 #endif
-
-
-#if defined(CHANGED) && defined(HW1_ELEVATOR)
-	// ElevatorTest(5, 5);
-#else
-    // ThreadTest(1);
-#endif
-
-
 #endif
 
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
