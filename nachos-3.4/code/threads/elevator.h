@@ -1,8 +1,8 @@
-
 #ifndef ELEVATOR_H
 #define ELEVATOR_H
 
 #include "copyright.h"
+#include "synch.h"
 
 void Elevator(int numFloors);
 void ArrivingGoingFromTo(int atFloor, int toFloor);
@@ -13,7 +13,6 @@ typedef struct Person {
     int toFloor;
 } Person;
 
-
 class ELEVATOR {
 
 public:
@@ -23,14 +22,27 @@ public:
     void start();
 
 private:
+    void unload();
+    void load();
+    bool requestsAbove();
+    bool requestsBelow();
+
+    int numFloors;
     int currentFloor;
-    Condition **entering;
-    Condition **leaving;
-    int *personsWaiting;
+    int direction;
     int occupancy;
     int maxOccupancy;
-    Lock *elevatorLock;
+    int totalWaiting;
+    int *personsWaiting;
+    int *personsGoingTo;
+    int boardingSlots;
+    bool doorsOpenForExit;
 
+    Lock *elevatorLock;
+    Condition **entering;
+    Condition **leaving;
+    Condition *idle;
+    Condition *doorDone;
 };
 
 #endif

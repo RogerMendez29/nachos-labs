@@ -5,19 +5,19 @@
 
 void ElevatorTest(int numFloors, int numPersons) {
 
-    // Create elevator thread
     Elevator(numFloors);
 
     for (int i = 0 ; i < numPersons; i++) {
-        int atFloor = (Random() % numFloors) + 1; // choose a random atFloor
+        int atFloor = (Random() % numFloors) + 1;
         int toFloor = -1 ;
         do {
-            toFloor = (Random() % numFloors) + 1; // choose a random toFloor
+            toFloor = (Random() % numFloors) + 1;
         } while (atFloor == toFloor) ;
 
         ArrivingGoingFromTo(atFloor, toFloor);
 
-        for(int j =0 ; j< 1000000; j++) {
+        int gap = Random() % 100;
+        for(int j =0 ; j< gap; j++) {
             currentThread->Yield();
         }
     }
