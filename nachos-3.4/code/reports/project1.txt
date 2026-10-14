@@ -1,5 +1,5 @@
 COP4610 — Nachos Project 1 Report
-Group Members: Roger Mendez
+Group Members: Roger Mendez, Jamar Morisseau, Giuliana Mignola
 
 Exercise 1:
 
@@ -18,12 +18,15 @@ Exercise 2:
     Acquire() and Release() work like P() and V() in the Semaphore class. Acquire() checks whether the lock has an owner. If it doesn't, the current thread becomes the owner. If it does, the current thread adds itself to the waiting queue and goes to sleep.
     Release() checks that the lock is held by the current thread. If it is, it sets the lock's owner to NULL, removes the next thread from the queue, and marks it as ready to run.
 
-Exercise 4: 
-    Implemented the Elevator in elevator.cc, using the Lock from Exercise 2 and the Condition from Exercise 3. The elevator runs its own thread and every person is also a thread. We used the elevatorLock for all the shared stuff. For example, like the current floor and how many people are inside the elevator or are waiting for it. People wait on the entering condition until the elevator gets to their floor. Once they're inside they wait on the leaving condition until it gets to the floor they want.
-    When the elevator stops at a floor, people are let out first then others enter in one at a time. This way, the elevator neve exceeds five people. Elevator goes up and down when nobody needs a floor further ahead. It takes 50 ticks to go between all the floors. If there is no one waiting, the elevator will sleep until someone new calls it. 
 Exercise 3:
 
-For this exercise, implemented the Condition functions in synch.cc, which included Wait(), Signal(), and Broadcast(). I tested the 
-functions using a Ping-Pong test with two threads and a Broadcast test with three waiting threads. Both tests worked as expected,
-even when I ran them with randomized interrupts (-rs 1). Both runs completed without errors or deadlocks, even thought the threads
-woke up in a different order during the randomized test.
+    For this exercise, implemented the Condition functions in synch.cc, which included Wait(), Signal(), and Broadcast(). I tested the 
+    functions using a Ping-Pong test with two threads and a Broadcast test with three waiting threads. Both tests worked as expected,
+    even when I ran them with randomized interrupts (-rs 1). Both runs completed without errors or deadlocks, even thought the threads
+    woke up in a different order during the randomized test.
+
+Exercise 4: 
+
+    Implemented the Elevator in elevator.cc, using the Lock from Exercise 2 and the Condition from Exercise 3. The elevator runs its own thread and every person is also a thread. We used the elevatorLock for all the shared stuff. For example, like the current floor and how many people are inside the elevator or are waiting for it. People wait on the entering condition until the elevator gets to their floor. Once they're inside they wait on the leaving condition until it gets to the floor they want.
+    When the elevator stops at a floor, people are let out first then others enter in one at a time. This way, the elevator neve exceeds five people. Elevator goes up and down when nobody needs a floor further ahead. It takes 50 ticks to go between all the floors. If there is no one waiting, the elevator will sleep until someone new calls it. 
+
