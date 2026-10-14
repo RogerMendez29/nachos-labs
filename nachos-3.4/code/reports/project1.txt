@@ -17,3 +17,10 @@ Exercise 2:
     We implemented the Lock by writing its writing the Acquire() & Release() methods. We noticed that we needed a way to tell whether a thread is the actual owner of the lock it's trying to release, so we added an owner attribute to the Lock class, of type Thread*.
     Acquire() and Release() work like P() and V() in the Semaphore class. Acquire() checks whether the lock has an owner. If it doesn't, the current thread becomes the owner. If it does, the current thread adds itself to the waiting queue and goes to sleep.
     Release() checks that the lock is held by the current thread. If it is, it sets the lock's owner to NULL, removes the next thread from the queue, and marks it as ready to run.
+
+Exercise 3:
+
+For this exercise, implemented the Condition functions in synch.cc, which included Wait(), Signal(), and Broadcast(). I tested the 
+functions using a Ping-Pong test with two threads and a Broadcast test with three waiting threads. Both tests worked as expected,
+even when I ran them with randomized interrupts (-rs 1). Both runs completed without errors or deadlocks, even thought the threads
+woke up in a different order during the randomized test.
